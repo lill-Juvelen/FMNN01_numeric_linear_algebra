@@ -1,2 +1,2 @@
-# num_linalg
-Programming assignments numeric linear algebra course
+# FMNN01
+Programming assignments in the course numeric linear algebra. 
