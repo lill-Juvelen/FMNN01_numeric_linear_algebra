@@ -5,20 +5,16 @@ Created on Wed Sep 11 10:12:44 2019
 @author: lill-Juvelen
 """
 
-# gram schmidt
+# gram schmidt orthogonalization
 
 import numpy as np
 from scipy.linalg import qr
-
-
-B = np.array([[3, 2, 4, 1],[5, 6, 7, 6], [2, 3, 8, 2], [5, 4, 3, 2]])
-A = B.transpose()
-
+from numpy import random, array, linalg
 
 def Classical_Gram_Schmidt(A):
     m,n = A.shape
-    R = np.zeros(m,n)
-    Q = np.zeros(m,n)
+    R = np.zeros((m,n))
+    Q = np.zeros((m,m))
     for j in range(0,n):
         v = A[:,j]
         for i in range(0,j):
@@ -28,44 +24,11 @@ def Classical_Gram_Schmidt(A):
         Q[:,j] = v/R[j,j]
     return Q, R
 
-#Q, R = Classical_Gram_Schmidt(A)
-
-#print(Q)
-#print(np.dot(Q[:,0], Q[:,1]))
-
-
-def Householder_simple(A):
-    m,n = A.shape
-    R = np.zeros((m,n))
-    Q = np.eye(m)
-    A_decomp = np.zeros((m,n))
-    # we overwrite the columns of A in each iteration
-    
-    #for each column of the matrix A
-    for k in range(0,n):
-        # pick column to reflect
-        a = A[k:,k]
-        x1 = a[0]
-        ahat = np.sign(x1) * np.array([np.linalg.norm(a)] + (m-1)*0.)
-        print('this is my a_hat')
-        print(ahat)
-        
-        # compute v
-        v = a-ahat
-        v = v / np.linalg.norm(v)
-        
-        Q = np.eye()
-        q = np.eye(len(a)) - np.outer(v,v)
-        Q[k:,k:] = q;
-        
-        
-
 
 def Householder(A):
     m,n = A.shape
     R = np.zeros((m,n))
     Q_final = np.eye(m)
-    
     A_next = A
     
     # compute H matrix and introduce zeros to j-th column of A
@@ -82,7 +45,7 @@ def Householder(A):
         Q[j:,j:] = q
         
         # save instances of Q
-        Q_final = Q @ Q_final
+        Q_final = Q_final @ Q
         
         A_next = Q @ A_next
         
@@ -90,7 +53,8 @@ def Householder(A):
     return Q_final, R
 
 
-# input parameter 
+# input parameter a is in the k-th step the (m-k)x1 column  k = 0,1,...,n
+# "the part of A that forms v"
 def Householderstep(a):
     m = len(a)
     Q = np.eye(m)
@@ -101,10 +65,6 @@ def Householderstep(a):
     column decides sign of reflection"""
     ahat= np.sign(a[0]) * np.array([norm_a]+(m-1)*[0.])
     
-    if (np.sign(a[0]) < 0 ):
-        print('a was negative')
-        print(a)
-    
     # compute v
     v = a - ahat
     v = v / np.linalg.norm(v)
@@ -113,16 +73,95 @@ def Householderstep(a):
     Q=np.eye(m)-2*np.outer(v,v)
     return Q
 
-A = np.array([[1,2],[4,5], [7,8]])
-print(A)
+
+def validate_QR(A, method):
+    m,n = A.shape
+    if method == 0:
+        print("Results from  Gram-Schmidt")
+        Q,R = Classical_Gram_Schmidt(A)
+    if method == 1:
+        print("Results from Householder")
+        Q,R = Householder(A)
+    QQ = Q.T @ Q
+    eye_dev = np.linalg.norm(np.eye(m) -QQ, 2)
+    
+    print()
+    ev = np.linalg.eigvals(QQ)
+    print("2-norm of (I-QTQ) is : ", eye_dev)
+    # 2 norm of I-QTQ
+    # 2 norm of Q
+    # eigenvalues of QTQ
+    # check if all columns are orthogonal
+    
+#%% testing Gram-Schmidt
+    
+print('testing')
+m = 101
+n = 100
+A = random.rand(m,n)
+validate_QR(A,0)
+
+
+#%%
+n = np.array([1,10,100,1000])
+evQ = []
+normQ = np.array([.0,.0,.0,.0])
+dev = np.array([.0,.0,.0,.0])
+detQ = np.array([.0,.0,.0,.0])
+
+for i in range(0,len(n)):
+    print('Testing for matrix size')
+
+    print(n[i]+2)
+    print(n[i])
+    
+    
+    B = random.rand(n[i]+2, n[i])
+    Q,R = Classical_Gram_Schmidt(B)
+    I = np.eye(n[i]+2)
+    QQ = Q.T @ Q
+    
+    ##% is the 2 norm of QTQ = 1 ?
+    
+    normQ[i] = linalg.norm(Q,2)
+    
+    print('2-norm of Q matrix: ')
+    print(normQ[i])
+    
+    # deviation I-Q^tQ
+    temp = linalg.norm(I - QQ,2)
+    dev[i] = temp
+    
+    print('Deviation from identity matrix')
+    print(dev[i])
+    # eigenvalues of Q
+    
+    ev = linalg.eigvals(QQ)
+    evQ.append(ev)
+    
+    # 
+    detQ[i] =linalg.det(QQ)
+    
+    print('determinant of QTQ')
+    print(detQ[i])        
+# %%
+    
+A = np.random.rand(1001,1000)
+
 Qfin, R = Householder(A)
+I = np.identity(1001)
+
 
 # results
 qTq = Qfin.T @ Qfin
+temp = linalg.norm(I - qTq,2)
+print('2 norm of deviation from identity matrix')
+print(temp)
+
 print(qTq)
 
 
-Adec = Qfin.T @ R
+Adec = Qfin @ R
 print('Our QR-decomposition')
 print(Adec)
 
@@ -130,7 +169,6 @@ q,r = qr(A)
 
 print('Scipy QR-decomposition')
 print(q @ r)
-
 
 q01 = np.dot(Qfin[:,0], Qfin[:,1])
 q02 = np.dot(Qfin[:,0], Qfin[:,2])
