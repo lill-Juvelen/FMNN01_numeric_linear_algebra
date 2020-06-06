@@ -13,6 +13,16 @@ import matplotlib.pyplot as plt
 from numpy import linalg as LA
 
 def demoGerschgorin(A):
+    """plots gerschgorin discs to demonstrate Gerschgorin's theorem.
+    
+    Greschgorin’s theorem says that for any m×m matrix A, every eigenvalue
+    can be found in at least one of m circular discs in the complex plane 
+    that have their centers corresponding to the diagonal elements of A, and 
+    their radius being the sum of the absolute value of the corresponding 
+    row elements.  The theorem also states that if n discs are connected
+    but disjoint from the remainderm−ndiscs, precisely n eigenvalues are found
+    within this connected domain. 
+    """
 
     n = len(A)
     eval, evec = LA.eig(A)
@@ -42,13 +52,15 @@ def demoGerschgorin(A):
     
 
 def A_p(p):
+    """ Returns a matrix. Off diagonal elements are multiplied with p.
+    small p yeilds diagonal-dominant matrix. 
+    """
     Ad = np.array([5,0,-2,-3])
     Ap = p* np.array([[0,0,0,-1], [1,0,-1,1],[-1.5, 1, 0, 1], [-1,1,3,0]])
     np.fill_diagonal(Ap, Ad)
     return Ap
 
-
-
-p = 0.01
+p = 0.1
 A = A_p(p)
+print(A)
 demoGerschgorin(A)

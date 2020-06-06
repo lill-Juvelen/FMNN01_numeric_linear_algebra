@@ -13,7 +13,7 @@ from numpy import linalg as LA
 import scipy 
 
 K = []
-#%%
+
 n = 100
 A = random.rand(n,n)
 A = 1/2 * (A + A.T) 
@@ -106,7 +106,7 @@ print(mm)
 
 K.append(np.mean(kvec))
 
-#%% funnkar för en iteration
+
 while k < 10:
     sigma = H[m-1][m-1] # choose diagonal element as shift
     sh = sigma * np.identity(m)

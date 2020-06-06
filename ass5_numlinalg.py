@@ -27,7 +27,6 @@ from pylab import *
  true eigenvalues. 
  
  Demonstration by plotting
- TODO: make animation :)
 """
 def A_p(p):
     Ad = np.array([5,0,-2,-3])
@@ -75,11 +74,5 @@ for j in range(0,10):
     plt.xlabel('Re' )
     plt.ylabel('Im')
     plt.show()
-    
-# how make animation of the frames?
-    
-
-
-
         
     
